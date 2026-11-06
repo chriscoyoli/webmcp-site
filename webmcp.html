@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>How this site works with AI agents | Carmel Valley Technologies</title>
+<meta name="description" content="A small working example of WebMCP: AI agents in the browser can read this site and draft a message, and only a person can send it.">
+<link rel="canonical" href="https://carmelvalleytechnologies.com/webmcp.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Carmel Valley Technologies">
+<meta property="og:title" content="How this site works with AI agents">
+<meta property="og:description" content="A small working example of WebMCP: agents can read this site and draft a message, and only a person can send it.">
+<meta property="og:url" content="https://carmelvalleytechnologies.com/webmcp.html">
+<meta property="og:image" content="https://carmelvalleytechnologies.com/icon-square-512.png">
+<!-- WebMCP origin trial: after registering this domain, add <meta http-equiv="origin-trial" content="TOKEN"> here and in index.html. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@700;800&family=Mulish:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" href="icon-square-32.png">
+<link rel="apple-touch-icon" href="icon-square-180.png">
+<style>
+  :root{
+    --ink:#19271f;
+    --green:#163a2b;
+    --green-deep:#0d231a;
+    --cream:#f6f1e6;
+    --cream-2:#efe7d6;
+    --paper:#fcf9f2;
+    --brass:#956c2c;
+    --brass-l:#cba968;
+    --muted:#4d5d53;
+    --muted-soft:#62716a;
+    --muted-on-green:#c4d1c6;
+    --line:#dcd3c0;
+    --line-soft:#e6ddcc;
+    --btn-text:#fdfbf6;
+    --serif:'Lora',Georgia,serif;
+    --sans:'Mulish',-apple-system,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%;text-size-adjust:100%;overflow-x:clip}
+  body{font-family:var(--sans);background:var(--cream);color:var(--ink);line-height:1.6;font-size:16px;overflow-x:clip;overflow-wrap:break-word}
+  .wrap{max-width:1240px;margin:0 auto;padding:0 36px}
+  h1,h2,h3{font-family:var(--serif);font-weight:600;line-height:1.15;letter-spacing:-.005em;text-wrap:balance}
+  code{font-family:var(--mono);font-size:.9em;background:var(--cream-2);padding:1px 5px;border-radius:2px;overflow-wrap:anywhere}
+  .eyebrow{font-size:11.5px;font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:var(--brass);display:inline-flex;align-items:center;gap:12px}
+  .eyebrow::before{content:"";width:28px;height:1.5px;background:var(--brass);opacity:.85}
+  .btn{display:inline-block;font-family:var(--sans);font-weight:700;font-size:14.5px;text-decoration:none;cursor:pointer;border:none;transition:background .2s,color .2s}
+  .btn-primary{background:var(--green);color:var(--btn-text);padding:14px 28px;border-radius:2px}
+  .btn-primary:hover{background:var(--green-deep)}
+  .btn-ghost{color:var(--green);padding:10px 18px;border-radius:2px;border:1.5px solid var(--green);background:transparent;font-size:13.5px}
+  .btn-ghost:hover{background:var(--green);color:var(--btn-text)}
+  :focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+
+  nav{position:sticky;top:0;z-index:100;background:var(--cream);border-bottom:1px solid var(--line)}
+  .nav-inner{display:flex;align-items:center;justify-content:space-between;gap:16px;height:64px}
+  .brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--ink);min-width:0;flex:1}
+  .brand-logo{width:38px;height:38px;border-radius:8px;flex-shrink:0;display:block}
+  .brand-text{font-family:'Montserrat',var(--sans);font-size:13.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .nav-links{display:flex;align-items:center;gap:28px;flex-shrink:0}
+  .nav-links a{text-decoration:none;color:var(--ink);font-size:14px;font-weight:700;opacity:.75}
+  .nav-links a:hover{opacity:1}
+  .nav-links a.btn-primary{color:var(--btn-text);opacity:1;padding:10px 20px;font-size:13.5px;white-space:nowrap}
+
+  .article-head{background:var(--paper);border-bottom:1px solid var(--line-soft);padding:64px 0 48px}
+  .measure{max-width:700px;margin:0 auto}
+  .article-head h1{font-size:clamp(34px,4.4vw,52px);line-height:1.12;margin-top:18px;color:var(--green)}
+  .dek{font-size:19px;color:var(--muted);line-height:1.55;margin-top:18px}
+  .byline{display:flex;align-items:center;gap:14px;margin-top:28px;padding-top:22px;border-top:1px solid var(--line)}
+  .byline img{width:44px;height:44px;border-radius:50%;object-fit:cover;border:1.5px solid var(--brass)}
+  .byline .nm{font-weight:800;font-size:14.5px}
+  .byline .dt{font-size:13px;color:var(--muted-soft)}
+
+  .article-body{padding:48px 0 64px}
+  .article-body p{font-size:18px;line-height:1.75}
+  .article-body p + p{margin-top:20px}
+  .article-body h2{font-size:clamp(24px,2.6vw,30px);color:var(--green);margin:44px 0 18px}
+  .article-body a{color:var(--green);font-weight:700}
+  .points{list-style:none;counter-reset:pt;margin-top:22px;border-top:1px solid var(--line)}
+  .points li{counter-increment:pt;display:grid;grid-template-columns:52px 1fr;gap:16px;padding:22px 0;border-bottom:1px solid var(--line)}
+  .points li::before{content:counter(pt,decimal-leading-zero);font-family:var(--serif);font-size:24px;font-weight:600;color:var(--brass);line-height:1.2}
+  .points h3{font-size:20px;color:var(--green)}
+  .points h3 code{font-size:.82em;background:none;padding:0}
+  .points p{font-size:16.5px;line-height:1.65;color:var(--muted);margin-top:6px}
+  .pull{margin:32px 0;padding:22px 0 22px 26px;border-left:2px solid var(--brass)}
+  .pull p{font-family:var(--serif);font-style:italic;font-size:23px;line-height:1.45;color:var(--green)}
+
+  .runner{margin-top:24px;background:var(--paper);border:1px solid var(--line);border-radius:3px;padding:26px 28px}
+  .runner .status{font-size:16px;font-weight:700}
+  .runner .acts{display:flex;flex-wrap:wrap;gap:12px;margin-top:16px}
+  .runner .acts:empty{display:none}
+  .runner pre{font-family:var(--mono);font-size:13px;line-height:1.55;background:var(--cream-2);border-radius:2px;padding:14px 16px;margin-top:16px;overflow:auto;max-height:340px;white-space:pre-wrap}
+  .runner pre:empty{display:none}
+  .runner pre.readable{font-family:var(--sans);font-size:15px}
+  .points .how{margin:12px 0 0 18px}
+  .points .how li{counter-increment:none;display:list-item;border:0;padding:0;margin-top:8px;font-size:16px;line-height:1.6;color:var(--ink)}
+  .points .how li::before{content:none}
+  .points .runner{margin-top:16px;padding:20px 22px}
+  .runner .acts:first-child{margin-top:0}
+  .runner .wait{font-size:15px;color:var(--muted-soft)}
+  .runner .status.on{color:var(--green)}
+  .runner .status.off{color:var(--brass)}
+  .btn:disabled{opacity:.5;cursor:default}
+  .demo{display:grid;gap:6px;margin-top:18px}
+  .demo label{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:6px}
+  .demo input,.demo textarea{font:inherit;font-size:15px;color:var(--ink);background:var(--cream);border:1px solid var(--line);border-radius:2px;padding:9px 11px;width:100%}
+  .demo .btn{margin-top:10px;font-size:13.5px;padding:11px 18px;justify-self:start}
+  .fc-agent-note{font-size:14px;font-weight:700;color:var(--green);background:var(--cream-2);border-left:2px solid var(--brass);padding:10px 14px;margin-top:10px}
+  .checks{margin:16px 0 0 20px}
+  .checks li{font-size:17px;line-height:1.65;margin-top:8px}
+  .article-body h3.sub{font-size:21px;color:var(--green);margin:34px 0 12px}
+  .article-body p.after-table{margin-top:18px}
+  .table-wrap{margin-top:18px}
+  table{width:100%;border-collapse:collapse;font-size:14.5px;line-height:1.5}
+  th,td{text-align:left;vertical-align:top;padding:11px 10px;border-bottom:1px solid var(--line)}
+  thead th{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border-bottom:1.5px solid var(--green)}
+  tbody th{font-weight:800;color:var(--green)}
+  .feedback{font-size:13.5px}
+  .made{margin-top:44px;background:var(--green);color:var(--cream);border-radius:3px;padding:32px 36px}
+  .made h2{font-size:22px;color:var(--cream);margin:0}
+  .article-body .made p{font-size:16px;line-height:1.65;color:var(--muted-on-green);margin-top:12px}
+  .article-body .made a{color:var(--brass-l)}
+
+  footer{background:var(--green-deep);color:var(--muted-on-green);padding:40px 0}
+  .foot-inner{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px}
+  .foot-brand{display:flex;align-items:center;gap:12px;color:var(--cream)}
+  .foot-brand span{font-family:'Montserrat',var(--sans);font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.05em}
+  .foot-meta{font-size:13.5px;line-height:1.7;text-align:right}
+  .foot-meta a{color:var(--brass-l);text-decoration:none}
+  .colophon{font-size:12px;opacity:.55;letter-spacing:.03em}
+
+  @media(max-width:820px){.nav-links a:not(.btn){display:none}}
+  @media(max-width:600px){
+    .wrap{padding:0 22px}
+    .brand-text{display:none}
+    .article-head{padding:44px 0 36px}
+    .article-body p{font-size:17px}
+    .points li{grid-template-columns:38px 1fr;gap:10px}
+    .runner{padding:22px 18px}
+    .made{padding:28px 24px}
+    .feedback thead{display:none}
+    .feedback,.feedback tbody,.feedback tr,.feedback th,.feedback td{display:block;width:100%}
+    .feedback tr{padding:14px 0;border-bottom:1px solid var(--line)}
+    .feedback th,.feedback td{border:0;padding:4px 0}
+    .feedback tbody th{font-size:16px}
+    .feedback td::before{content:attr(data-label);display:block;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:6px}
+    .foot-meta{text-align:left}
+  }
+  table.feedback th code{white-space:nowrap}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap nav-inner">
+    <a class="brand" href="./"><img class="brand-logo" src="icon-square-512.png" alt="Carmel Valley Technologies logo"><span class="brand-text">Carmel Valley Technologies</span></a>
+    <div class="nav-links">
+      <a href="./#work">Selected work</a>
+      <a href="articles/">Articles</a>
+      <a href="./#about">About</a>
+      <a class="btn btn-primary" href="./#contact">Contact</a>
+    </div>
+  </div>
+</nav>
+
+<header class="article-head">
+  <div class="wrap">
+    <div class="measure">
+      <span class="eyebrow">Agentic web</span>
+      <h1>How this site works with AI agents.</h1>
+      <p class="dek">This site now gives AI agents a short menu of things they can do. An agent can look up information and draft a message, and only a person can send it. Here is what that means and how to try it.</p>
+      <div class="byline">
+        <img src="chris-coyoli.jpg" alt="Chris Coyoli">
+        <div>
+          <div class="nm">Chris Coyoli</div>
+          <div class="dt">November 4, 2026 · Updated November 5, 2026</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="article-body">
+  <div class="wrap">
+    <article class="measure">
+      <h2>What this is</h2>
+      <p>An AI agent is software that can carry out a task for you, not only answer questions. You might ask one to "look at this person's recent work and draft them a note." Today, an agent usually has to read a website the way a person would, then guess what to click.</p>
+      <p>WebMCP is a proposed new web standard, which means browser makers and developers are still working out how it should work. It lets a website give an agent a short menu of things it can do. Each item on the menu is called a tool. It is part of what Chrome calls the <a href="https://developer.chrome.com/blog/chrome-at-io26" rel="noopener">agentic web</a>. I added three tools to this site:</p>
+      <ol class="points">
+        <li>
+          <div>
+            <h3>See the selected work</h3>
+            <p>Gives the agent the list of projects shown on the homepage.</p>
+          </div>
+        </li>
+        <li>
+          <div>
+            <h3>Learn about Chris</h3>
+            <p>Gives the agent the short profile shown on the homepage.</p>
+          </div>
+        </li>
+        <li>
+          <div>
+            <h3>Draft a message</h3>
+            <p>Fills in a form for the visitor to review. It cannot press Send. On the homepage this is the real contact form. On this page it is a sample.</p>
+          </div>
+        </li>
+      </ol>
+
+      <h2>Why it matters</h2>
+      <p>A clear menu gives an agent a direct way to do a task, so it does not have to guess its way around the page. The site owner also decides what an agent is allowed to do. Here, an agent can do the typing, but the person decides whether to send anything.</p>
+      <p>WebMCP is still experimental and may change. Regular visitors will not notice anything on this site, because the menu is only for agents in browsers that support it.</p>
+
+      <h2>How it is built</h2>
+      <p>Chrome's docs describe two ways to give a browser agent structured tools. The imperative API is written in JavaScript. The declarative API adds attributes to an ordinary HTML form. This site uses both.</p>
+      <div class="table-wrap">
+        <table class="feedback">
+          <thead><tr><th scope="col">Tool</th><th scope="col">What it does</th><th scope="col">Built with</th><th scope="col">Safeguard</th></tr></thead>
+          <tbody>
+            <tr><th scope="row"><code>list_portfolio</code></th><td data-label="What it does">Returns the selected work from the homepage.</td><td data-label="Built with">Imperative API</td><td data-label="Safeguard"><code>readOnlyHint</code></td></tr>
+            <tr><th scope="row"><code>get_about</code></th><td data-label="What it does">Returns the short profile from the homepage.</td><td data-label="Built with">Imperative API</td><td data-label="Safeguard"><code>readOnlyHint</code></td></tr>
+            <tr><th scope="row"><code>draft_message</code></th><td data-label="What it does">Fills in the real contact form on the homepage.</td><td data-label="Built with">Declarative API</td><td data-label="Safeguard">No <code>toolautosubmit</code>, so a person presses Send.</td></tr>
+            <tr><th scope="row"><code>draft_inquiry</code></th><td data-label="What it does">Fills in the sample form on this page.</td><td data-label="Built with">Imperative API</td><td data-label="Safeguard">Checks its own input. Send is turned off.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="after-table">The read tools take their answers from the homepage markup, so what an agent reads matches what a visitor sees. An automated browser test also checks tool names, descriptions and output sizes against <a href="https://developer.chrome.com/docs/ai/webmcp/secure-tools" rel="noopener">Chrome's suggested limits</a>.</p>
+
+      <h2>How to try it</h2>
+      <p>You do not need an AI agent, and you do not need to know how to code. The buttons below do what an agent would do, so you can see the results yourself. You need the Chrome browser on a computer, and it takes about two minutes.</p>
+      <ol class="points try">
+        <li>
+          <div>
+            <h3>Turn on the feature in Chrome</h3>
+            <p>Because WebMCP is still experimental, Chrome keeps it switched off. This step turns it on in your own browser only, and it changes nothing on this website. You can set it back to Default at any time.</p>
+            <ul class="how">
+              <li>Copy this text into the address bar at the top of Chrome, where you normally type a website, and press Enter: <code>chrome://flags/#enable-webmcp-testing</code></li>
+              <li>Chrome opens its page of experimental settings. Find the highlighted setting at the top and change its menu from Default to <strong>Enabled</strong>.</li>
+              <li>Click <strong>Relaunch</strong> at the bottom of the window. Chrome restarts. Then come back to this page and check the box below.</li>
+            </ul>
+            <div class="runner" aria-live="polite">
+              <div class="status" id="status">Checking this browser...</div>
+            </div>
+          </div>
+        </li>
+        <li>
+          <div>
+            <h3>Ask for site information</h3>
+            <p>Click a button. An agent would make this same request behind the scenes. You should see the information it would receive, taken from the homepage, appear below.</p>
+            <div class="runner">
+              <div class="acts" id="acts"><span class="wait">The buttons appear after Step 1.</span></div>
+              <pre id="output"></pre>
+            </div>
+          </div>
+        </li>
+        <li>
+          <div>
+            <h3>Watch it draft an inquiry</h3>
+            <p>Click the button to run the draft tool on this sample form. You should see the fields fill in and a note appear. The sample form cannot send anything.</p>
+            <div class="runner">
+              <div class="acts"><button type="button" class="btn btn-ghost" id="run-draft" disabled>Draft a sample inquiry</button><button type="button" class="btn btn-ghost" id="clear-draft" disabled>Clear the form</button></div>
+              <form class="demo" data-webmcp-demo onsubmit="return false">
+                <label for="demo-name">Name</label>
+                <input id="demo-name" name="name" type="text" autocomplete="off" required>
+                <label for="demo-email">Email</label>
+                <input id="demo-email" name="email" type="email" autocomplete="off" required>
+                <label for="demo-org">Company</label>
+                <input id="demo-org" name="organization" type="text" autocomplete="off">
+                <label for="demo-msg">Message</label>
+                <textarea id="demo-msg" name="message" rows="3"></textarea>
+                <button type="submit" class="btn btn-primary" disabled>Send is turned off in this sample</button>
+              </form>
+            </div>
+          </div>
+        </li>
+        <li>
+          <div>
+            <h3>Optional: look behind the scenes</h3>
+            <p>You can stop at Step 3 if you like. This step is for anyone curious about what the page offers to an agent, since that normally happens out of sight. DevTools is an inspection panel built into Chrome that developers use to see how a page works. Opening it changes nothing on the website. Its WebMCP section lists the tools on the page and records each time one runs.</p>
+            <ul class="how">
+              <li>Press <strong>Cmd+Option+I</strong> on a Mac or <strong>F12</strong> on Windows. A panel opens beside or below this page.</li>
+              <li>Click the <strong>Application</strong> tab at the top. If you do not see it, look under the <strong>&raquo;</strong> menu.</li>
+              <li>Click <strong>WebMCP</strong> in the left sidebar of that panel. You should see the three tools under Available tools, listed by their technical names.</li>
+              <li>Click <code>draft_inquiry</code>, enter a sample name, email and message, then click <strong>Run tool</strong>.</li>
+              <li>The run appears under Invoked tools. Click it to see its status, the input you entered and the output the agent would receive.</li>
+              <li>To close the panel, press the same keys again.</li>
+            </ul>
+          </div>
+        </li>
+      </ol>
+
+      <h2>How to know it worked</h2>
+      <p>The test was successful if you saw each of these results:</p>
+      <ul class="checks">
+        <li><strong>Step 1:</strong> The box says "It is on" and that your browser can see 3 tools.</li>
+        <li><strong>Step 2:</strong> The buttons show the same selected work and profile that appear on the homepage.</li>
+        <li><strong>Step 3:</strong> The sample form fills in, a note says nothing was sent, and the Send button stays off.</li>
+        <li><strong>Step 4, if you tried it:</strong> <code>draft_inquiry</code> shows as completed and its output matches the table below.</li>
+      </ul>
+      <h3 class="sub">What the DevTools output means</h3>
+      <p>The output is the reply an agent receives after using a tool. It is written in a format software can read:</p>
+      <div class="table-wrap">
+        <table class="plain">
+          <thead><tr><th scope="col">In the output</th><th scope="col">What it means</th></tr></thead>
+          <tbody>
+            <tr><td><code>"drafted": true</code></td><td>The form was filled in.</td></tr>
+            <tr><td><code>"sent": false</code></td><td>Nothing was sent. This is the safety rule working.</td></tr>
+            <tr><td><code>"filled": [...]</code></td><td>The form fields the tool filled in.</td></tr>
+            <tr><td><code>"keptVisitorText": [...]</code></td><td>Fields left alone because the visitor had already typed something different. An empty list means there were none.</td></tr>
+            <tr><td><code>"next": "..."</code></td><td>Tells the agent that the visitor must review the form and press Send.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="after-table">To test the safety check, clear the form and run <code>draft_inquiry</code> again with <code>not-an-email</code> as the email. You should see <code>"drafted": false</code>, a note that the email is not valid, and an empty form.</p>
+      <h3 class="sub">What a successful test proves</h3>
+      <p>It shows that a browser can find this site's tools, that the tools return real information, and that the draft tool stops short of sending anything. In these tests, the buttons and DevTools did what an agent would do. It does not show how a particular AI agent would choose or use these tools.</p>
+
+      <h2>Checked with Chrome's tools</h2>
+      <p>I ran the <a href="https://goo.gle/lighthouse-agentic-web" rel="noopener">Agentic Browsing</a> category in Lighthouse 13.6.0 against the homepage on November 5, 2026. It ran on a local copy of the site in Chromium 153 with WebMCP testing turned on. Lighthouse says this category is still under development.</p>
+      <div class="table-wrap">
+        <table class="feedback">
+          <thead><tr><th scope="col">Audit</th><th scope="col">Result</th><th scope="col">Note</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Accessibility tree</th><td data-label="Result">Passed</td><td data-label="Note">Agents can read the page structure.</td></tr>
+            <tr><th scope="row">WebMCP form coverage</th><td data-label="Result">Passed</td><td data-label="Note">The first run flagged the contact form. That is why it now uses the declarative API.</td></tr>
+            <tr><th scope="row">WebMCP tools registered</th><td data-label="Result">3 tools found</td><td data-label="Note">Two imperative and one declarative.</td></tr>
+            <tr><th scope="row">WebMCP schemas</th><td data-label="Result">Passed</td><td data-label="Note">Each tool's input description is valid.</td></tr>
+            <tr><th scope="row">Cumulative Layout Shift</th><td data-label="Result">Passed (0)</td><td data-label="Note">The page does not move while it loads.</td></tr>
+            <tr><th scope="row">llms.txt</th><td data-label="Result">Passed</td><td data-label="Note">Added <a href="llms.txt">a short file</a> after the first run showed there was none.</td></tr>
+            <tr><th scope="row">Agentic Resource Discovery</th><td data-label="Result">Not applicable</td><td data-label="Note">This site has no manifest. See the discovery row in the table below.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3 class="sub">What this does not show</h3>
+      <p>These checks test the tools, not how well a real agent chooses and uses them. I have not run <a href="https://developer.chrome.com/docs/ai/webmcp/evals" rel="noopener">WebMCP Evals</a>, Chrome's method for that. This site has also not joined the <a href="https://developer.chrome.com/docs/ai/webmcp" rel="noopener">WebMCP origin trial</a>, so the tools appear only in a browser with the testing setting turned on.</p>
+
+      <h2>For developers: technical feedback</h2>
+      <p>You can skip this section unless you build websites. I compared Chromium 153 with WebMCP testing turned on against Chrome 156.0.8078.81 on a Mac. The spec column refers to the <a href="https://webmachinelearning.github.io/webmcp/" rel="noopener">WebMCP community draft</a> dated November 2, 2026.</p>
+      <div class="table-wrap">
+        <table class="feedback">
+          <thead><tr><th scope="col">Area</th><th scope="col">Chromium 153</th><th scope="col">Chrome 156</th><th scope="col">Spec and docs</th><th scope="col">Status</th></tr></thead>
+          <tbody>
+            <tr>
+              <th scope="row">Input validation</th>
+              <td data-label="Chromium 153">A call missing a required field reached the tool.</td>
+              <td data-label="Chrome 156">Same. <code>executeTool</code> passed <code>{wrong: 5}</code> to a tool that requires <code>n</code>.</td>
+              <td data-label="Spec and docs">A March 2026 group resolution in <a href="https://github.com/webmachinelearning/webmcp/issues/92" rel="noopener">issue #92</a> makes the browser responsible for validation. The draft says only that input is "expected to match."</td>
+              <td data-label="Status">Open question. This site's draft tool validates its own input.</td>
+            </tr>
+            <tr>
+              <th scope="row">Asking the visitor during a tool</th>
+              <td data-label="Chromium 153">The tool received only its input and <code>signal</code>.</td>
+              <td data-label="Chrome 156">Same.</td>
+              <td data-label="Spec and docs"><a href="https://developer.chrome.com/docs/ai/webmcp/secure-tools" rel="noopener">Chrome's docs</a> say the draft includes <code>requestUserInteraction()</code>, but I could not find it in the current draft. Design continues in <a href="https://github.com/webmachinelearning/webmcp/issues/165" rel="noopener">issue #165</a>.</td>
+              <td data-label="Status">Open. The draft stops at the form, and the visitor decides.</td>
+            </tr>
+            <tr>
+              <th scope="row">Tool input format</th>
+              <td data-label="Chromium 153"><code>executeTool</code> accepted a JSON string and rejected an object.</td>
+              <td data-label="Chrome 156">Accepts an object and rejects a string.</td>
+              <td data-label="Spec and docs">The draft specifies an object.</td>
+              <td data-label="Status">Resolved in 156. This page supports both.</td>
+            </tr>
+            <tr>
+              <th scope="row">High-stakes hint</th>
+              <td data-label="Chromium 153"><code>consequentialHint</code> was missing from <code>getTools</code> annotations.</td>
+              <td data-label="Chrome 156">Returned as set.</td>
+              <td data-label="Spec and docs">Defined in the draft.</td>
+              <td data-label="Status">Resolved in 156.</td>
+            </tr>
+            <tr>
+              <th scope="row">API location</th>
+              <td data-label="Chromium 153"><code>document.modelContext</code> only.</td>
+              <td data-label="Chrome 156">Same.</td>
+              <td data-label="Spec and docs">Uses <code>document.modelContext</code>.</td>
+              <td data-label="Status">No issue. Update older guides.</td>
+            </tr>
+            <tr>
+              <th scope="row">Honeypot fields</th>
+              <td data-label="Chromium 153">A spam-trap field hidden with <code>display:none</code> appeared in the declarative tool's input schema. <code>type="hidden"</code> fields did not.</td>
+              <td data-label="Chrome 156">Not tested.</td>
+              <td data-label="Spec and docs">I did not find this covered in <a href="https://developer.chrome.com/docs/ai/webmcp/declarative-api" rel="noopener">Chrome's declarative API docs</a>.</td>
+              <td data-label="Status">Open. This site uses <code>toolparamdescription</code> to tell agents to leave the field empty.</td>
+            </tr>
+            <tr>
+              <th scope="row">Activation event</th>
+              <td data-label="Chromium 153"><code>toolactivated</code> fired on <code>window</code>, not on <code>document.modelContext</code>.</td>
+              <td data-label="Chrome 156">Not tested.</td>
+              <td data-label="Spec and docs"><a href="https://developer.chrome.com/docs/ai/webmcp/declarative-api" rel="noopener">Chrome's docs</a> place these events on <code>document.modelContext</code>.</td>
+              <td data-label="Status">Avoided. The contact form's note uses the <code>:tool-form-active</code> CSS pseudo-class, which worked in 153.</td>
+            </tr>
+            <tr>
+              <th scope="row">Declarative tool result</th>
+              <td data-label="Chromium 153"><code>executeTool</code> stayed pending after filling the form, while the form waited for a person.</td>
+              <td data-label="Chrome 156">Not tested.</td>
+              <td data-label="Spec and docs">Without <code>toolautosubmit</code>, the docs say the user must click Submit.</td>
+              <td data-label="Status">Fits the safety rule. I have not tested what an agent receives after a real submit.</td>
+            </tr>
+            <tr>
+              <th scope="row">Discovery</th>
+              <td data-label="Chromium 153">Not applicable.</td>
+              <td data-label="Chrome 156">Not applicable.</td>
+              <td data-label="Spec and docs"><a href="https://developer.chrome.com/docs/ai/webmcp" rel="noopener">Chrome's docs</a> note that clients must visit a site to learn whether it has tools. I did not find a WebMCP entry type in the <a href="https://agenticresourcediscovery.org/spec/" rel="noopener">ARD v0.91 proposal</a>.</td>
+              <td data-label="Status">Open question. This site has no ARD manifest.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <section class="made">
+        <h2>How I made this</h2>
+        <p>I chose the use case and set the rule that an agent can draft a message but only a person can send it. An AI coding agent wrote the code, the automated browser test and the first draft of this page under my direction. I did not write the code by hand.</p>
+      </section>
+    </article>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap foot-inner">
+    <div class="foot-brand"><img class="brand-logo" src="icon-square-512.png" alt="Carmel Valley Technologies logo"><span>Carmel Valley Technologies</span></div>
+    <div class="foot-meta">
+      San Francisco Bay Area &nbsp;·&nbsp; <a href="https://www.linkedin.com/in/chriscoyoli/" target="_blank" rel="noopener">LinkedIn</a> &nbsp;·&nbsp; <a href="https://x.com/ChrisCoyoli" target="_blank" rel="noopener">X</a> &nbsp;·&nbsp; <a href="https://github.com/chriscoyoli" target="_blank" rel="noopener">GitHub</a><br>
+      <span style="opacity:.6">© 2026 Carmel Valley Technologies. All rights reserved.</span><br>
+      <span class="colophon">V3.7 · Updated November 5, 2026</span>
+    </div>
+  </div>
+</footer>
+
+<script src="webmcp.js"></script>
+<script>
+  (function () {
+    var status = document.getElementById('status');
+    var acts = document.getElementById('acts');
+    var output = document.getElementById('output');
+    var runDraft = document.getElementById('run-draft');
+    var clearDraft = document.getElementById('clear-draft');
+    var demo = document.querySelector('form[data-webmcp-demo]');
+
+    if (!('modelContext' in document)) {
+      status.className = 'status off';
+      status.textContent = 'Not on yet in this browser. Follow the steps above, then come back to this page. This test needs Chrome on a computer.';
+      return;
+    }
+
+    var modelContext = document.modelContext;
+    // Chrome versions differ: newer ones take an object, while Chromium 153 takes
+    // a JSON string and also returns one. Try the object form first, then the string.
+    function run(tool, input) {
+      return Promise.resolve().then(function () {
+        return modelContext.executeTool(tool, input);
+      }).catch(function (objectError) {
+        return modelContext.executeTool(tool, JSON.stringify(input)).catch(function () {
+          throw objectError;
+        });
+      }).then(function (result) {
+        return typeof result === 'string' ? JSON.parse(result) : result;
+      });
+    }
+
+    modelContext.getTools().then(function (tools) {
+      status.className = 'status on';
+      status.textContent = 'It is on. Your browser can see ' + tools.length + ' tools on this page. Continue to Step 2.';
+      acts.textContent = '';
+      tools.filter(function (tool) { return tool.name !== 'draft_inquiry'; }).forEach(function (tool) {
+        var button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'btn btn-ghost';
+        button.textContent = tool.name === 'list_portfolio' ? 'Show the selected work' : 'Show about Chris';
+        button.addEventListener('click', function () {
+          output.textContent = 'Running...';
+          run(tool, {}).then(function (result) {
+            output.className = 'readable';
+            output.textContent = result.projects
+              ? result.projects.map(function (item) { return item.title + ' (' + item.type + ')\n' + item.description; }).join('\n\n')
+              : [result.name, result.title, result.location].concat(result.bio, 'LinkedIn: ' + result.linkedin, 'Contact form: ' + result.contactForm).join('\n\n');
+          }).catch(function (error) {
+            output.textContent = 'The tool failed: ' + error.message;
+          });
+        });
+        acts.appendChild(button);
+      });
+
+      var draft = tools.find(function (tool) { return tool.name === 'draft_inquiry'; });
+      runDraft.disabled = clearDraft.disabled = false;
+      runDraft.addEventListener('click', function () {
+        run(draft, {
+          name: 'Sample Visitor',
+          email: 'sample@example.com',
+          organization: 'Sample Company',
+          message: 'We have a role that looks like a fit. Can we talk?'
+        }).catch(function (error) {
+          status.textContent = 'The draft tool failed: ' + error.message;
+        });
+      });
+      clearDraft.addEventListener('click', function () {
+        demo.reset();
+        var note = demo.querySelector('.fc-agent-note');
+        if (note) note.remove();
+      });
+    }).catch(function (error) {
+      status.className = 'status off';
+      status.textContent = 'Could not list the tools: ' + error.message;
+    });
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+# Carmel Valley Technologies
+
+> Chris Coyoli's project for helping businesses put AI and automation to work. This site is the portfolio.
+
+The homepage and the WebMCP page offer WebMCP tools to browser agents. An agent can read the selected work and profile, and fill in a form. Only a person can send a message.
+
+## Pages
+
+- [Homepage](https://carmelvalleytechnologies.com/): selected work, about, and the contact form
+- [How this site works with AI agents](https://carmelvalleytechnologies.com/webmcp.html): the WebMCP tools, how to try them, test results, and technical feedback
+- [Articles](https://carmelvalleytechnologies.com/articles/): notes on putting AI to work
+
+## Contact
+
+- [Contact form](https://carmelvalleytechnologies.com/#contact)
+- [LinkedIn](https://www.linkedin.com/in/chriscoyoli/)
+- [GitHub](https://github.com/chriscoyoli)
+- [X](https://x.com/ChrisCoyoli)
