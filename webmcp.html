@@ -103,6 +103,12 @@
   .runner .status.off{color:var(--brass)}
   .btn:disabled{opacity:.5;cursor:default}
   .demo{display:grid;gap:6px;margin-top:18px}
+  .after-runner{margin-top:18px}
+  .decl-note{display:none;font-size:14px;font-weight:700;color:var(--green);background:var(--cream-2);border-left:2px solid var(--brass);padding:10px 14px;margin-top:10px}
+  form:tool-form-active{outline:2px solid var(--brass);outline-offset:6px}
+  form:tool-form-active .decl-note{display:block}
+  form.cleared:tool-form-active{outline:none}
+  form.cleared:tool-form-active .decl-note{display:none}
   .demo label{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:6px}
   .demo input,.demo textarea{font:inherit;font-size:15px;color:var(--ink);background:var(--cream);border:1px solid var(--line);border-radius:2px;padding:9px 11px;width:100%}
   .demo .btn{margin-top:10px;font-size:13.5px;padding:11px 18px;justify-self:start}
@@ -174,7 +180,7 @@
         <img src="chris-coyoli.jpg" alt="Chris Coyoli">
         <div>
           <div class="nm">Chris Coyoli</div>
-          <div class="dt">November 4, 2026 · Updated November 5, 2026</div>
+          <div class="dt">November 4, 2026 · Updated November 6, 2026</div>
         </div>
       </div>
     </div>
@@ -186,7 +192,7 @@
     <article class="measure">
       <h2>What this is</h2>
       <p>An AI agent is software that can carry out a task for you, not only answer questions. You might ask one to "look at this person's recent work and draft them a note." Today, an agent usually has to read a website the way a person would, then guess what to click.</p>
-      <p>WebMCP is a proposed new web standard, which means browser makers and developers are still working out how it should work. It lets a website give an agent a short menu of things it can do. Each item on the menu is called a tool. It is part of what Chrome calls the <a href="https://developer.chrome.com/blog/chrome-at-io26" rel="noopener">agentic web</a>. I added three tools to this site:</p>
+      <p>WebMCP is a proposed new web standard, which means browser makers and developers are still working out how it should work. It lets a website give an agent a short menu of things it can do. Each item on the menu is called a tool. It is part of what Chrome calls the <a href="https://developer.chrome.com/blog/chrome-at-io26" rel="noopener">agentic web</a>. I added tools for three jobs to this site:</p>
       <ol class="points">
         <li>
           <div>
@@ -220,8 +226,8 @@
           <tbody>
             <tr><th scope="row"><code>list_portfolio</code></th><td data-label="What it does">Returns the selected work from the homepage.</td><td data-label="Built with">Imperative API</td><td data-label="Safeguard"><code>readOnlyHint</code></td></tr>
             <tr><th scope="row"><code>get_about</code></th><td data-label="What it does">Returns the short profile from the homepage.</td><td data-label="Built with">Imperative API</td><td data-label="Safeguard"><code>readOnlyHint</code></td></tr>
-            <tr><th scope="row"><code>draft_message</code></th><td data-label="What it does">Fills in the real contact form on the homepage.</td><td data-label="Built with">Declarative API</td><td data-label="Safeguard">No <code>toolautosubmit</code>, so a person presses Send.</td></tr>
-            <tr><th scope="row"><code>draft_inquiry</code></th><td data-label="What it does">Fills in the sample form on this page.</td><td data-label="Built with">Imperative API</td><td data-label="Safeguard">Checks its own input. Send is turned off.</td></tr>
+            <tr><th scope="row"><code>draft_message</code></th><td data-label="What it does">Fills in the real contact form on the homepage, and the declarative sample on this page.</td><td data-label="Built with">Declarative API</td><td data-label="Safeguard">No <code>toolautosubmit</code>, so a person presses Send.</td></tr>
+            <tr><th scope="row"><code>draft_inquiry</code></th><td data-label="What it does">Fills in the imperative sample form on this page.</td><td data-label="Built with">Imperative API</td><td data-label="Safeguard">Checks its own input. Send is turned off.</td></tr>
           </tbody>
         </table>
       </div>
@@ -272,6 +278,20 @@
                 <button type="submit" class="btn btn-primary" disabled>Send is turned off in this sample</button>
               </form>
             </div>
+            <p class="after-runner">The form above uses the imperative API, written in JavaScript. The form below does the same job with the declarative API: the tool comes from attributes on the HTML form.</p>
+            <div class="runner">
+              <div class="acts"><button type="button" class="btn btn-ghost" id="run-declarative" disabled>Draft with the declarative tool</button><button type="button" class="btn btn-ghost" id="clear-declarative" disabled>Clear</button></div>
+              <form class="demo" id="declarative-demo" toolname="draft_message" tooldescription="Fills in this sample form so the visitor can review it. This sample has nowhere to send. Use when someone wants to try the declarative API." onsubmit="return false">
+                <label for="decl-name">Name</label>
+                <input id="decl-name" name="name" type="text" autocomplete="off" required>
+                <label for="decl-email">Email</label>
+                <input id="decl-email" name="email" type="email" autocomplete="off" required toolparamdescription="Email address for the reply">
+                <label for="decl-msg">Message</label>
+                <textarea id="decl-msg" name="message" rows="3" required></textarea>
+                <p class="decl-note" role="status">An AI agent drafted this using the declarative API. Nothing was sent. This sample form has nowhere to send.</p>
+                <button type="submit" class="btn btn-primary">Send does nothing in this sample</button>
+              </form>
+            </div>
           </div>
         </li>
         <li>
@@ -281,7 +301,7 @@
             <ul class="how">
               <li>Press <strong>Cmd+Option+I</strong> on a Mac or <strong>F12</strong> on Windows. A panel opens beside or below this page.</li>
               <li>Click the <strong>Application</strong> tab at the top. If you do not see it, look under the <strong>&raquo;</strong> menu.</li>
-              <li>Click <strong>WebMCP</strong> in the left sidebar of that panel. You should see the three tools under Available tools, listed by their technical names.</li>
+              <li>Click <strong>WebMCP</strong> in the left sidebar of that panel. You should see the four tools under Available tools, listed by their technical names.</li>
               <li>Click <code>draft_inquiry</code>, enter a sample name, email and message, then click <strong>Run tool</strong>.</li>
               <li>The run appears under Invoked tools. Click it to see its status, the input you entered and the output the agent would receive.</li>
               <li>To close the panel, press the same keys again.</li>
@@ -293,7 +313,7 @@
       <h2>How to know it worked</h2>
       <p>The test was successful if you saw each of these results:</p>
       <ul class="checks">
-        <li><strong>Step 1:</strong> The box says "It is on" and that your browser can see 3 tools.</li>
+        <li><strong>Step 1:</strong> The box says "It is on" and that your browser can see 4 tools.</li>
         <li><strong>Step 2:</strong> The buttons show the same selected work and profile that appear on the homepage.</li>
         <li><strong>Step 3:</strong> The sample form fills in, a note says nothing was sent, and the Send button stays off.</li>
         <li><strong>Step 4, if you tried it:</strong> <code>draft_inquiry</code> shows as completed and its output matches the table below.</li>
@@ -317,14 +337,14 @@
       <p>It shows that a browser can find this site's tools, that the tools return real information, and that the draft tool stops short of sending anything. In these tests, the buttons and DevTools did what an agent would do. It does not show how a particular AI agent would choose or use these tools.</p>
 
       <h2>Checked with Chrome's tools</h2>
-      <p>I ran the <a href="https://goo.gle/lighthouse-agentic-web" rel="noopener">Agentic Browsing</a> category in Lighthouse 13.6.0 against the homepage on November 5, 2026. It ran on a local copy of the site in Chromium 153 with WebMCP testing turned on. Lighthouse says this category is still under development.</p>
+      <p>I ran the <a href="https://goo.gle/lighthouse-agentic-web" rel="noopener">Agentic Browsing</a> category in Lighthouse 13.6.0 against this page on November 6, 2026. It ran on a local copy of the site in Chromium 153 with WebMCP testing turned on. Lighthouse says this category is still under development.</p>
       <div class="table-wrap">
         <table class="feedback">
           <thead><tr><th scope="col">Audit</th><th scope="col">Result</th><th scope="col">Note</th></tr></thead>
           <tbody>
             <tr><th scope="row">Accessibility tree</th><td data-label="Result">Passed</td><td data-label="Note">Agents can read the page structure.</td></tr>
-            <tr><th scope="row">WebMCP form coverage</th><td data-label="Result">Passed</td><td data-label="Note">The first run flagged the contact form. That is why it now uses the declarative API.</td></tr>
-            <tr><th scope="row">WebMCP tools registered</th><td data-label="Result">3 tools found</td><td data-label="Note">Two imperative and one declarative.</td></tr>
+            <tr><th scope="row">WebMCP form coverage</th><td data-label="Result">1 form flagged</td><td data-label="Note">Expected. It flags the imperative sample, which has no attributes on purpose. An earlier run flagged a form with none, which is why the site added the declarative API.</td></tr>
+            <tr><th scope="row">WebMCP tools registered</th><td data-label="Result">4 tools found</td><td data-label="Note">Three imperative and one declarative. The homepage has three: the two read tools and its contact form.</td></tr>
             <tr><th scope="row">WebMCP schemas</th><td data-label="Result">Passed</td><td data-label="Note">Each tool's input description is valid.</td></tr>
             <tr><th scope="row">Cumulative Layout Shift</th><td data-label="Result">Passed (0)</td><td data-label="Note">The page does not move while it loads.</td></tr>
             <tr><th scope="row">llms.txt</th><td data-label="Result">Passed</td><td data-label="Note">Added <a href="llms.txt">a short file</a> after the first run showed there was none.</td></tr>
@@ -333,7 +353,7 @@
         </table>
       </div>
       <h3 class="sub">What this does not show</h3>
-      <p>These checks test the tools, not how well a real agent chooses and uses them. I have not run <a href="https://developer.chrome.com/docs/ai/webmcp/evals" rel="noopener">WebMCP Evals</a>, Chrome's method for that. This site has also not joined the <a href="https://developer.chrome.com/docs/ai/webmcp" rel="noopener">WebMCP origin trial</a>, so the tools appear only in a browser with the testing setting turned on.</p>
+      <p>The homepage passed the same scored audits. These checks test the tools, not how well a real agent chooses and uses them. I have not run <a href="https://developer.chrome.com/docs/ai/webmcp/evals" rel="noopener">WebMCP Evals</a>, Chrome's method for that. This site has also not joined the <a href="https://developer.chrome.com/docs/ai/webmcp" rel="noopener">WebMCP origin trial</a>, so the tools appear only in a browser with the testing setting turned on.</p>
 
       <h2>For developers: technical feedback</h2>
       <p>You can skip this section unless you build websites. I compared Chromium 153 with WebMCP testing turned on against Chrome 156.0.8078.81 on a Mac. The spec column refers to the <a href="https://webmachinelearning.github.io/webmcp/" rel="noopener">WebMCP community draft</a> dated November 2, 2026.</p>
@@ -381,21 +401,35 @@
               <td data-label="Chromium 153">A spam-trap field hidden with <code>display:none</code> appeared in the declarative tool's input schema. <code>type="hidden"</code> fields did not.</td>
               <td data-label="Chrome 156">Not tested.</td>
               <td data-label="Spec and docs">I did not find this covered in <a href="https://developer.chrome.com/docs/ai/webmcp/declarative-api" rel="noopener">Chrome's declarative API docs</a>.</td>
-              <td data-label="Status">Open. This site uses <code>toolparamdescription</code> to tell agents to leave the field empty.</td>
+              <td data-label="Status">Open. The contact form uses <code>toolparamdescription</code> to tell agents to leave the field alone.</td>
             </tr>
             <tr>
               <th scope="row">Activation event</th>
               <td data-label="Chromium 153"><code>toolactivated</code> fired on <code>window</code>, not on <code>document.modelContext</code>.</td>
               <td data-label="Chrome 156">Not tested.</td>
               <td data-label="Spec and docs"><a href="https://developer.chrome.com/docs/ai/webmcp/declarative-api" rel="noopener">Chrome's docs</a> place these events on <code>document.modelContext</code>.</td>
-              <td data-label="Status">Avoided. The contact form's note uses the <code>:tool-form-active</code> CSS pseudo-class, which worked in 153.</td>
+              <td data-label="Status">Avoided. The declarative sample form's note uses the <code>:tool-form-active</code> CSS pseudo-class, which worked in 153.</td>
+            </tr>
+            <tr>
+              <th scope="row">Disabled submit button</th>
+              <td data-label="Chromium 153">A declarative form with a disabled submit button failed with "No submit button was found."</td>
+              <td data-label="Chrome 156">Not tested.</td>
+              <td data-label="Spec and docs">Without <code>toolautosubmit</code>, the docs say the user must click Submit. I did not find this case covered.</td>
+              <td data-label="Status">Open. The sample keeps its button enabled and sends nothing.</td>
+            </tr>
+            <tr>
+              <th scope="row">Resetting a declarative form</th>
+              <td data-label="Chromium 153">Calling <code>reset()</code> cleared the fields, but the form still matched <code>:tool-form-active</code> and <code>executeTool</code> stayed pending.</td>
+              <td data-label="Chrome 156">Not tested.</td>
+              <td data-label="Spec and docs">I did not find this case covered in <a href="https://developer.chrome.com/docs/ai/webmcp/declarative-api" rel="noopener">Chrome's declarative API docs</a>.</td>
+              <td data-label="Status">Open. This page hides its note with a class when the form is cleared.</td>
             </tr>
             <tr>
               <th scope="row">Declarative tool result</th>
               <td data-label="Chromium 153"><code>executeTool</code> stayed pending after filling the form, while the form waited for a person.</td>
               <td data-label="Chrome 156">Not tested.</td>
               <td data-label="Spec and docs">Without <code>toolautosubmit</code>, the docs say the user must click Submit.</td>
-              <td data-label="Status">Fits the safety rule. I have not tested what an agent receives after a real submit.</td>
+              <td data-label="Status">Fits the safety rule. In a test with a simulated form service, the agent received the <code>respondWith</code> result after the person pressed Send. If that send fails, a retry does not reach the agent.</td>
             </tr>
             <tr>
               <th scope="row">Discovery</th>
@@ -422,7 +456,7 @@
     <div class="foot-meta">
       San Francisco Bay Area &nbsp;·&nbsp; <a href="https://www.linkedin.com/in/chriscoyoli/" target="_blank" rel="noopener">LinkedIn</a> &nbsp;·&nbsp; <a href="https://x.com/ChrisCoyoli" target="_blank" rel="noopener">X</a> &nbsp;·&nbsp; <a href="https://github.com/chriscoyoli" target="_blank" rel="noopener">GitHub</a><br>
       <span style="opacity:.6">© 2026 Carmel Valley Technologies. All rights reserved.</span><br>
-      <span class="colophon">V3.7 · Updated November 5, 2026</span>
+      <span class="colophon">V4.0 · Updated November 6, 2026</span>
     </div>
   </div>
 </footer>
@@ -436,6 +470,9 @@
     var runDraft = document.getElementById('run-draft');
     var clearDraft = document.getElementById('clear-draft');
     var demo = document.querySelector('form[data-webmcp-demo]');
+    var runDeclarative = document.getElementById('run-declarative');
+    var clearDeclarative = document.getElementById('clear-declarative');
+    var declarativeDemo = document.getElementById('declarative-demo');
 
     if (!('modelContext' in document)) {
       status.className = 'status off';
@@ -462,7 +499,7 @@
       status.className = 'status on';
       status.textContent = 'It is on. Your browser can see ' + tools.length + ' tools on this page. Continue to Step 2.';
       acts.textContent = '';
-      tools.filter(function (tool) { return tool.name !== 'draft_inquiry'; }).forEach(function (tool) {
+      tools.filter(function (tool) { return tool.name !== 'draft_inquiry' && tool.name !== 'draft_message'; }).forEach(function (tool) {
         var button = document.createElement('button');
         button.type = 'button';
         button.className = 'btn btn-ghost';
@@ -473,7 +510,7 @@
             output.className = 'readable';
             output.textContent = result.projects
               ? result.projects.map(function (item) { return item.title + ' (' + item.type + ')\n' + item.description; }).join('\n\n')
-              : [result.name, result.title, result.location].concat(result.bio, 'LinkedIn: ' + result.linkedin, 'Contact form: ' + result.contactForm).join('\n\n');
+              : [result.name, result.title, result.location].concat(result.bio, 'LinkedIn: ' + result.linkedin).join('\n\n');
           }).catch(function (error) {
             output.textContent = 'The tool failed: ' + error.message;
           });
@@ -498,6 +535,32 @@
         var note = demo.querySelector('.fc-agent-note');
         if (note) note.remove();
       });
+
+      // The declarative tool's result stays pending while the form waits for a person.
+      var declarative = tools.find(function (tool) { return tool.name === 'draft_message'; });
+      if (declarative) {
+        runDeclarative.disabled = clearDeclarative.disabled = false;
+        runDeclarative.addEventListener('click', function () {
+          declarativeDemo.classList.remove('cleared');
+          // A declarative call stays pending until a person acts, so an unsupported input
+          // format may never reject. Chromium 153 needs a string, so send that first.
+          var sample = {
+            name: 'Sample Visitor',
+            email: 'sample@example.com',
+            message: 'We have a role that looks like a fit. Can we talk?'
+          };
+          modelContext.executeTool(declarative, JSON.stringify(sample)).catch(function () {
+            return modelContext.executeTool(declarative, sample);
+          }).catch(function (error) {
+            status.textContent = 'The declarative tool failed: ' + error.message;
+          });
+        });
+        clearDeclarative.addEventListener('click', function () {
+          // reset() does not end the tool's active state in Chromium 153, so hide the note too.
+          declarativeDemo.reset();
+          declarativeDemo.classList.add('cleared');
+        });
+      }
     }).catch(function (error) {
       status.className = 'status off';
       status.textContent = 'Could not list the tools: ' + error.message;

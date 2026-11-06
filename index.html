@@ -186,11 +186,12 @@
   .band-grid{display:grid;grid-template-columns:minmax(300px,1fr) minmax(320px,1.15fr);gap:64px;align-items:start}
   .band h2{font-size:clamp(28px,2.8vw,38px);color:var(--cream);margin-top:14px;max-width:20ch}
   .band .belief-p{font-size:16px;color:var(--muted-on-green);margin-top:20px;line-height:1.68;max-width:44ch}
-  .contact-meta{font-size:14px;font-weight:700;color:var(--cream);margin-top:18px}
-  .contact-links{display:flex;flex-wrap:wrap;gap:0 22px}
-  .contact-link{display:inline-flex;align-items:center;gap:8px;margin-top:18px;font-weight:800;font-size:14px;color:var(--brass-l);text-decoration:none;border-bottom:1.5px solid var(--brass-l);padding-bottom:3px}
-  .contact-link span{transition:transform .25s ease}
-  .contact-link:hover span{transform:translateX(4px)}
+  .socials{display:flex;align-items:center;gap:30px;margin-top:26px}
+  .social{display:inline-flex;padding:6px;margin:-6px;color:var(--cream);transition:opacity .2s}
+  .social svg{width:36px;height:36px;fill:currentColor;display:block}
+  .social:hover{opacity:.72}
+  .social:focus-visible{outline:2px solid var(--brass-l);outline-offset:3px}
+  .contact-meta{font-size:14px;font-weight:700;color:var(--muted-on-green);margin-top:20px}
   .form-card{background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:4px;padding:32px;box-shadow:0 18px 44px rgba(13,35,26,.22)}
   .form-card form{display:flex;flex-direction:column;gap:16px}
   .two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
@@ -199,9 +200,13 @@
   .field input:focus,.field textarea:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 3px rgba(22,58,43,.1)}
   .field textarea{resize:vertical;min-height:110px}
   .form-card button{width:100%;padding:15px;font-size:15px}
+  .form-card button[disabled]{opacity:.6;cursor:default}
+  .trap{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
   .fc-agent-note{display:none;font-size:14px;font-weight:700;color:var(--green);background:var(--cream-2);border-left:2px solid var(--brass);padding:10px 14px}
   form:tool-form-active{outline:2px solid var(--brass);outline-offset:8px}
   form:tool-form-active .fc-agent-note{display:block}
+  .form-status{font-size:14.5px;font-weight:700;padding:10px 14px;border-left:2px solid var(--brass);background:var(--cream-2);color:var(--green)}
+  .form-status a{color:var(--green)}
   @media(max-width:480px){.two-col{grid-template-columns:1fr}.form-card{padding:24px}}
   @media(max-width:820px){.band-grid{grid-template-columns:1fr;gap:36px}.band-mark{display:none}}
 
@@ -324,7 +329,7 @@
         <div class="feature-copy">
           <span class="tag">Agentic web</span>
           <h3 class="ttl">WebMCP on a live site</h3>
-          <p class="dsc">Structured tools for browser agents, built into this site with both the imperative and declarative APIs. An agent can read the portfolio and draft a message, and only a person can send it. The write-up covers how to try it, results from Lighthouse's Agentic Browsing audit, and technical feedback on where Chrome and the draft spec differ.</p>
+          <p class="dsc">Structured tools for browser agents, built into this site with both the imperative and declarative APIs. An agent can read the portfolio and draft a message in the contact form, and only a person can send it. The write-up covers how to try it, results from Lighthouse's Agentic Browsing audit, and technical feedback on where Chrome and the draft spec differ.</p>
           <a class="go" href="webmcp.html">See how it works <span>&rarr;</span></a>
         </div>
       </article>
@@ -333,6 +338,7 @@
         <span class="tag">Native iOS prototype</span>
         <h3 class="ttl">Private club member app</h3>
         <p class="dsc">A working prototype that puts tee times, dining, events, and member life in one app. Built and presented to a private club's team to make the idea concrete.</p>
+        <a class="go" href="work/member-app.html">See the write-up and demo <span>&rarr;</span></a>
       </article>
       <article class="work-card">
         <img class="thumb" src="work-pca.jpg" alt="Red vintage Porsche on a winding coastal road at sunset, with a live oak, hazy purple mountains, and the bay beyond" loading="lazy">
@@ -346,12 +352,14 @@
         <span class="tag">Workflow automation</span>
         <h3 class="ttl">Request intake and routing</h3>
         <p class="dsc">A workflow that reads incoming requests, triages them, and routes each one into the tools a team already uses.</p>
+        <a class="go" href="work/request-routing.html">See the write-up and demo <span>&rarr;</span></a>
       </article>
       <article class="work-card">
         <img class="thumb" src="work-bookings.jpg" alt="Phone on a workbench showing a booking calendar, freshly detailed green sports car behind" loading="lazy">
         <span class="tag">Web app</span>
         <h3 class="ttl">Bookings and memberships</h3>
         <p class="dsc">Online booking and prepaid memberships for a detailing shop.</p>
+        <a class="go" href="work/bookings.html">See the write-up and demo <span>&rarr;</span></a>
       </article>
     </div>
   </div>
@@ -423,21 +431,20 @@
       <div class="reveal">
         <span class="eyebrow">Contact</span>
         <h2>Reach Chris.</h2>
-        <p class="belief-p">Send a note here, or connect on LinkedIn, where the full career history lives.</p>
-        <p class="contact-meta" data-about="location">San Francisco Bay Area</p>
-        <div class="contact-links">
-          <a class="contact-link" href="https://www.linkedin.com/in/chriscoyoli/" target="_blank" rel="noopener">Chris on LinkedIn <span>&rarr;</span></a>
-          <a class="contact-link" href="https://x.com/ChrisCoyoli" target="_blank" rel="noopener">Chris on X <span>&rarr;</span></a>
-          <a class="contact-link" href="https://github.com/chriscoyoli" target="_blank" rel="noopener">Code on GitHub <span>&rarr;</span></a>
+        <p class="belief-p">Send a note here, or reach out on LinkedIn, where the full career history lives.</p>
+        <div class="socials">
+          <a class="social" href="https://www.linkedin.com/in/chriscoyoli/" target="_blank" rel="noopener" aria-label="Chris Coyoli on LinkedIn" title="Chris Coyoli on LinkedIn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></a>
+          <a class="social" href="https://x.com/ChrisCoyoli" target="_blank" rel="noopener" aria-label="Chris Coyoli on X" title="Chris Coyoli on X"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.234 10.162 22.977 0h-2.072l-7.591 8.824L7.251 0H.258l9.168 13.343L.258 24H2.33l8.016-9.318L16.749 24h6.993zm-2.837 3.299-.929-1.329L3.076 1.56h3.182l5.965 8.532.929 1.329 7.754 11.09h-3.182z"/></svg></a>
+          <a class="social" href="https://github.com/chriscoyoli" target="_blank" rel="noopener" aria-label="Chris Coyoli on GitHub" title="Chris Coyoli on GitHub"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg></a>
         </div>
+        <p class="contact-meta" data-about="location">San Francisco Bay Area</p>
       </div>
       <div class="form-card reveal d1">
-        <form toolname="draft_message" tooldescription="Fills in the contact form so the visitor can review it and press Send. Use when someone wants to write to Chris." action="https://formsubmit.co/hello@carmelvalleytechnologies.com" method="POST">
-          <input type="hidden" name="_subject" value="New message | Carmel Valley Technologies">
-          <input type="hidden" name="_captcha" value="false">
-          <input type="hidden" name="_template" value="table">
-          <input type="hidden" name="_next" value="https://carmelvalleytechnologies.com/thanks.html">
-          <input type="text" name="_honey" style="display:none" tabindex="-1" autocomplete="off" aria-hidden="true" toolparamdescription="Spam trap. Leave this empty.">
+        <form id="contact-form" toolname="draft_message" tooldescription="Fills in the contact form so the visitor can review it and press Send. Use when someone wants to write to Chris." novalidate>
+          <input type="hidden" name="access_key" value="YOUR_WEB3FORMS_ACCESS_KEY">
+          <input type="hidden" name="subject" value="New message | Carmel Valley Technologies">
+          <input type="hidden" name="from_name" value="carmelvalleytechnologies.com">
+          <input type="checkbox" name="botcheck" class="trap" tabindex="-1" autocomplete="off" aria-hidden="true" toolparamdescription="Spam trap. Leave this unchecked.">
           <div class="two-col">
             <div class="field">
               <label for="name">Name</label>
@@ -458,6 +465,7 @@
           </div>
           <p class="fc-agent-note" role="status">An AI agent drafted this for you. Nothing has been sent. Review it, then press Send message.</p>
           <button type="submit" class="btn btn-primary">Send message</button>
+          <p class="form-status" id="form-status" role="status" hidden></p>
         </form>
       </div>
     </div>
@@ -471,12 +479,62 @@
       San Francisco Bay Area &nbsp;·&nbsp; <a href="https://www.linkedin.com/in/chriscoyoli/" target="_blank" rel="noopener">LinkedIn</a> &nbsp;·&nbsp; <a href="https://x.com/ChrisCoyoli" target="_blank" rel="noopener">X</a> &nbsp;·&nbsp; <a href="https://github.com/chriscoyoli" target="_blank" rel="noopener">GitHub</a><br>
       <a href="webmcp.html">How this site works with AI agents</a><br>
       <span style="opacity:.6">© 2026 Carmel Valley Technologies. All rights reserved.</span><br>
-      <span class="colophon">V3.7 · Updated November 5, 2026</span>
+      <span class="colophon">V4.0 · Updated November 6, 2026</span>
     </div>
   </div>
 </footer>
 
 <script>
+  // Contact form. Sends in the background so a visitor never lands on a third-party
+  // error page, and keeps their text if sending fails.
+  (function () {
+    var form = document.getElementById('contact-form');
+    var statusEl = document.getElementById('form-status');
+    var button = form.querySelector('button[type=submit]');
+    var FAILED = 'Your message could not be sent, and your text is still here. Please try again, or reach Chris on <a href="https://www.linkedin.com/in/chriscoyoli/" target="_blank" rel="noopener">LinkedIn</a>.';
+    function show(html) {
+      statusEl.innerHTML = html;
+      statusEl.hidden = false;
+    }
+    function send() {
+      var controller = new AbortController();
+      var timer = setTimeout(function () { controller.abort(); }, 15000);
+      var data = {};
+      new FormData(form).forEach(function (value, key) { data[key] = value; });
+      return fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify(data),
+        signal: controller.signal
+      }).then(function (response) {
+        return response.json().then(function (body) {
+          if (!response.ok || !body.success) throw new Error('Not sent');
+        });
+      }).finally(function () { clearTimeout(timer); });
+    }
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+      if (!form.reportValidity()) return;
+      button.disabled = true;
+      statusEl.hidden = true;
+      var sending = send().then(function () {
+        form.reset();
+        show('Thanks. Your message was sent.');
+        return JSON.stringify({ sent: true });
+      }, function () {
+        show(FAILED);
+        return JSON.stringify({ sent: false, error: 'The message could not be sent.' });
+      }).finally(function () { button.disabled = false; });
+      if (event.agentInvoked && event.respondWith) event.respondWith(sending);
+    });
+    // Moves focus to the form, so the Contact button still responds when the section is already in view.
+    document.querySelectorAll('a[href="#contact"]').forEach(function (link) {
+      link.addEventListener('click', function () {
+        setTimeout(function () { form.elements.name.focus({ preventScroll: true }); }, 500);
+      });
+    });
+  })();
+
   const io=new IntersectionObserver((entries)=>{
     entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}});
   },{threshold:.12});

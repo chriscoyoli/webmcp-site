@@ -8,8 +8,9 @@
   The safety rule: an agent can read public site content and fill in a form. Only
   the visitor can send it. No tool here submits a form.
 
-  This file holds the imperative tools. The homepage contact form is a declarative
-  tool, set up with toolname and tooldescription attributes in index.html.
+  This file holds the imperative tools. The declarative tool, draft_message, is set
+  up with toolname and tooldescription attributes on the homepage contact form and
+  on a sample form in webmcp.html.
 
   Read tools pull from the homepage markup, so the answers cannot drift from what
   the site shows. Chrome does not validate input against inputSchema before it
@@ -77,8 +78,7 @@
           previously: Array.prototype.map.call(home.querySelectorAll('#about .prev-cos span'), function (el) {
             return el.textContent.trim();
           }),
-          linkedin: linkedin ? linkedin.getAttribute('href') : '',
-          contactForm: 'https://carmelvalleytechnologies.com/#contact'
+          linkedin: linkedin ? linkedin.getAttribute('href') : ''
         };
       });
     }
@@ -168,7 +168,7 @@
         sent: false,
         filled: filled,
         keptVisitorText: kept,
-        next: 'The visitor must review the form and press Send message. This tool cannot send it.'
+        next: 'This is a sample form, so nothing can be sent. The visitor can review it or clear it.'
       };
     }
   });

@@ -48,7 +48,7 @@ const names = (page) => page.evaluate(async () =>
   const errors = [];
   const posts = [];
   page.on('pageerror', (error) => errors.push(error.message));
-  page.on('request', (request) => { if (request.method() === 'POST') posts.push(request.url()); });
+  page.on('request', (request) => { if (request.method() === 'POST' && !request.url().includes('api.web3forms.com')) posts.push(request.url()); });
   await page.goto(`${base}/index.html`);
 
   // Imperative read tools plus the declarative contact form.
@@ -71,6 +71,59 @@ const names = (page) => page.evaluate(async () =>
   // Chrome's suggested limits: names 30, tool descriptions 500, parameter descriptions 150, output 1,500.
   assert.ok(JSON.stringify(portfolio).length <= 1500, 'list_portfolio output is over budget');
   assert.ok(JSON.stringify(about).length <= 1500, 'get_about output is over budget');
+  // The personal email address stays off the page.
+  assert.strictEqual(await page.locator('a[href^="mailto:"]').count(), 0);
+  assert.ok(!(await page.content()).includes('coyoli.com'));
+
+  // The real contact form is declarative: no toolautosubmit, so the agent fills it and a person sends it.
+  const sends = [];
+  let formServiceWorks = true;
+  await page.route('https://api.web3forms.com/submit', async (route) => {
+    sends.push(JSON.parse(route.request().postData()));
+    if (!formServiceWorks) return route.abort();
+    return route.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify({ success: true }) });
+  });
+  const contactForm = page.locator('#contact-form');
+  assert.strictEqual(await contactForm.getAttribute('toolautosubmit'), null);
+  assert.strictEqual(await page.locator('.fc-agent-note').isVisible(), false);
+  const homeSchema = await page.evaluate(async () => JSON.parse((await document.modelContext.getTools()).find((tool) => tool.name === 'draft_message').inputSchema));
+  assert.ok(homeSchema.properties.botcheck.description.includes('Leave this unchecked'));
+  assert.ok(!('access_key' in homeSchema.properties));
+  await page.evaluate(async () => {
+    const tool = (await document.modelContext.getTools()).find((candidate) => candidate.name === 'draft_message');
+    window.toolResult = 'pending';
+    document.modelContext.executeTool(tool, JSON.stringify({ name: 'Agent Name', email: 'a@example.com', message: 'Hello' }))
+      .then((value) => { window.toolResult = value; }, (error) => { window.toolResult = `error: ${error.message}`; });
+  });
+  await page.waitForFunction(() => document.getElementById('msg').value === 'Hello');
+  assert.ok(await contactForm.evaluate((el) => el.matches(':tool-form-active')));
+  assert.strictEqual(await page.locator('.fc-agent-note').isVisible(), true);
+  await page.waitForTimeout(400);
+  assert.strictEqual(sends.length, 0);
+
+  // Failure: the visitor stays on the page, keeps their text, and is pointed to LinkedIn.
+  formServiceWorks = false;
+  await contactForm.locator('button[type=submit]').click();
+  await page.waitForFunction(() => !document.getElementById('form-status').hidden);
+  assert.ok((await page.textContent('#form-status')).includes('LinkedIn'));
+  assert.strictEqual(await page.inputValue('#msg'), 'Hello');
+  assert.ok(page.url().startsWith(base));
+
+  // Success: the message goes out once and the form clears.
+  formServiceWorks = true;
+  await page.waitForFunction(() => !document.querySelector('#contact-form button[type=submit]').disabled);
+  await contactForm.locator('button[type=submit]').click();
+  await page.waitForFunction(() => document.getElementById('form-status').textContent.includes('was sent'));
+  assert.strictEqual(sends[sends.length - 1].message, 'Hello');
+  assert.strictEqual(await page.inputValue('#msg'), '');
+  assert.ok((await page.evaluate(() => window.toolResult)).includes('"sent":false'));
+  assert.strictEqual(await page.locator('a[href^="mailto:"]').count(), 0);
+
+  // The explainer page has both sample forms.
+  await page.goto(`${base}/webmcp.html`);
+  assert.deepStrictEqual(await names(page), ['draft_inquiry', 'draft_message', 'get_about', 'list_portfolio']);
+
+  // Chrome's suggested limits: names 30, tool descriptions 500, parameter descriptions 150.
   const budget = await page.evaluate(async () => (await document.modelContext.getTools()).map((tool) => ({
     name: tool.name, description: tool.description,
     params: Object.entries(JSON.parse(tool.inputSchema).properties).map(([key, value]) => [key, value.description || '']),
@@ -80,34 +133,34 @@ const names = (page) => page.evaluate(async () =>
     assert.ok(tool.name.length <= 30 && tool.description.length <= 500, `${tool.name} is over budget`);
     tool.params.forEach(([key, text]) => assert.ok(key.length <= 30 && text.length <= 150, `${tool.name}.${key} is over budget`));
   }
-  assert.ok(budget.filter((tool) => tool.name !== 'draft_message').every((tool) => tool.annotations.readOnlyHint));
+  assert.ok(budget.filter((tool) => !tool.name.startsWith('draft_')).every((tool) => tool.annotations.readOnlyHint));
 
-  // The honeypot is exposed by the browser, so it tells agents to leave it empty.
-  const draftSchema = budget.find((tool) => tool.name === 'draft_message');
-  assert.ok(draftSchema.params.find(([key]) => key === '_honey')[1].includes('Leave this empty'));
-
-  // The personal email address stays off the page.
-  assert.strictEqual(await page.locator('a[href^="mailto:"]').count(), 0);
-  assert.ok(!(await page.content()).includes('coyoli.com'));
-
-  // The real contact form is declarative: no toolautosubmit, so the agent fills it and a person sends it.
-  const form = page.locator('#contact form');
-  assert.strictEqual(await form.getAttribute('toolautosubmit'), null);
-  assert.strictEqual(await page.locator('.fc-agent-note').isVisible(), false);
-  await page.evaluate(async () => {
-    const tool = (await document.modelContext.getTools()).find((candidate) => candidate.name === 'draft_message');
-    document.modelContext.executeTool(tool, JSON.stringify({ name: 'Agent Name', email: 'a@example.com', message: 'Hello' })).catch(() => {});
-  });
-  await page.waitForFunction(() => document.getElementById('msg').value === 'Hello');
-  assert.strictEqual(await page.inputValue('#email'), 'a@example.com');
-  assert.ok(await form.evaluate((el) => el.matches(':tool-form-active')));
-  assert.strictEqual(await page.locator('.fc-agent-note').isVisible(), true);
-  await page.waitForTimeout(500);
+  // The declarative tool fills its sample form, and no toolautosubmit means it cannot submit.
+  const declarative = page.locator('#declarative-demo');
+  assert.strictEqual(await declarative.getAttribute('toolautosubmit'), null);
+  assert.strictEqual(await page.locator('.decl-note').isVisible(), false);
+  await page.waitForFunction(() => !document.getElementById('run-declarative').disabled);
+  await page.click('#run-declarative');
+  await page.waitForFunction(() => document.getElementById('decl-email').value === 'sample@example.com');
+  assert.ok(await declarative.evaluate((el) => el.matches(':tool-form-active')));
+  assert.strictEqual(await page.locator('.decl-note').isVisible(), true);
+  await declarative.locator('button[type=submit]').click();
+  assert.strictEqual(page.url().endsWith('/webmcp.html'), true);
+  assert.deepStrictEqual(posts, []);
+  await page.goto(`${base}/webmcp.html`);
+  await page.waitForFunction(() => !document.getElementById('run-declarative').disabled);
+  await page.click('#run-declarative');
+  await page.waitForFunction(() => document.getElementById('decl-email').value === 'sample@example.com');
+  await page.click('#clear-declarative');
+  assert.strictEqual(await page.inputValue('#decl-email'), '');
+  assert.strictEqual(await page.locator('.decl-note').isVisible(), false);
+  await page.click('#run-declarative');
+  await page.waitForFunction(() => document.getElementById('decl-email').value === 'sample@example.com');
+  assert.strictEqual(await page.locator('.decl-note').isVisible(), true);
   assert.deepStrictEqual(posts, []);
 
-  // The explainer page's sample form uses the draft tool and cannot send.
+  // The imperative sample form uses the draft tool and cannot send.
   await page.goto(`${base}/webmcp.html`);
-  assert.deepStrictEqual(await names(page), ['draft_inquiry', 'get_about', 'list_portfolio']);
 
   // Invalid input is rejected by the tool, because the browser lets it through.
   let result = await call(page, 'draft_inquiry', { wrong: 5 });

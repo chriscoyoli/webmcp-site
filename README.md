@@ -10,20 +10,20 @@ For the plain-language write-up, test results, and technical feedback, see [How 
 |---|---|---|---|
 | `list_portfolio` | Returns the selected work from the homepage | Imperative API | `readOnlyHint` |
 | `get_about` | Returns the short profile from the homepage | Imperative API | `readOnlyHint` |
-| `draft_message` | Fills in the contact form on the homepage | Declarative API | No `toolautosubmit`, so a person presses Send |
-| `draft_inquiry` | Fills in the sample form on `webmcp.html` | Imperative API | Checks its own input, and Send is turned off |
+| `draft_message` | Fills in the contact form on the homepage, and a declarative sample on `webmcp.html` | Declarative API | No `toolautosubmit`, so a person presses Send |
+| `draft_inquiry` | Fills in the imperative sample form on `webmcp.html` | Imperative API | Checks its own input, and Send is turned off |
 
 The rule behind all four: an agent can read public content and fill in a form, but only a person can send a message.
 
 ## Files
 
 - `webmcp.js`: the imperative tools
-- `index.html`: the homepage, including the declarative contact form
-- `webmcp.html`: the write-up, with a sample form and buttons that run the tools
+- `index.html`: the homepage, including the declarative contact form. It sends through [Web3Forms](https://web3forms.com/) in the background, so a failed send shows a message instead of an error page. The access key is replaced with a placeholder here.
+- `webmcp.html`: the write-up, with imperative and declarative sample forms and buttons that run the tools
 - `llms.txt`: a short guide to the site for agents
 - `tests/webmcp-smoke.js`: browser test
 
-Images and other site files are not included, so pages opened from this repo will show missing images.
+Images, the case study pages, and other site files are not included, so pages opened from this repo will show missing images and links.
 
 ## Run the test
 
@@ -35,7 +35,7 @@ npx playwright install chromium
 node tests/webmcp-smoke.js
 ```
 
-It checks the tools, their output against the homepage, Chrome's suggested size limits, and that nothing is ever sent.
+It checks the tools, their output against the homepage, Chrome's suggested size limits, and that an agent never sends anything. Contact form sends are simulated, including a failed send.
 
 ## How this was built
 
